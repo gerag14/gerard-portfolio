@@ -1,0 +1,53 @@
+version: "3.3"
+services:
+  db:
+    image: postgres:15
+    container_name: postgres15
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5434:5434"
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    deploy:
+      placement:
+        constraints:
+          - node.labels.ripay-com.app-db-data == true
+
+  queue:
+    image: rabbitmq:3-management
+    container_name: rabbit
+    ports:
+      - "5672:5672"
+
+  backend: &backend
+    container_name: django-api
+    depends_on:
+      - db
+    env_file:
+      - .env
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8008:8008"
+    command: "tail -f /dev/null" # Infinite loop to keep container live doing
+
+  celeryworker:
+    <<: *backend
+    container_name: celery
+    depends_on:
+      - db
+      - queue
+    command: bash scripts/worker-start.sh
+    ports: []
+    labels: []
+    tty: false
+    stdin_open: false
+
+volumes:
+  app-db-data:

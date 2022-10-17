@@ -1,0 +1,74 @@
+repos:
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        name: isort (python)
+        exclude: ^backend/alembic/
+        args: ["--profile", "black"]
+      - id: isort
+        name: isort (cython)
+        types: [cython]
+      - id: isort
+        name: isort (pyi)
+        types: [pyi]
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        exclude: ^backend/alembic/
+        language_version: python3
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        exclude: ^backend/alembic/
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: docker exec api pytest
+        pass_filenames: false
+        language: system
+        types: [python]
+        stages: [push]
+        verbose: true
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      # Identify invalid files
+      - id: check-yaml
+      - id: check-json
+      # git checks
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: check-case-conflict
+      # Python checks
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: requirements-txt-fixer
+      - id: fix-byte-order-marker
+      # General quality checks
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+  #- repo: https://github.com/pre-commit/mirrors-mypy
+  #  rev: v0.971
+  #  hooks:
+  #    - id: mypy
+  #      additional_dependencies:
+  #        [
+  #          SQLAlchemy==1.4.26,
+  #          pydantic==1.9.1,
+  #          web3==6.0.0b1,
+  #          types-redis==4.3.11,
+  #          types-simplejson==3.17.7,
+  #          types-requests==2.28.5,
+  #          pyprctl,
+  #        ]
+  #      exclude: "backend/alembic/"
